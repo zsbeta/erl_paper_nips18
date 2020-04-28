@@ -124,7 +124,7 @@ class SumTree:
 class NormalizedActions(gym.ActionWrapper):
 
     def _action(self, action):
-        action = (action + 1) / 2  # [-1, 1] => [0, 1]
+        action = (action + 1) / 2  # [-1, 1] => [0, 1] ***The activation function could be changed to output directly [0,1], who not??
         action *= (self.action_space.high - self.action_space.low)
         action += self.action_space.low
         return action
@@ -165,7 +165,3 @@ def odict_to_numpy(odict):
         else: #Floats
             state = np.concatenate((state, np.array([l[i]])))
     return state
-
-
-
-
