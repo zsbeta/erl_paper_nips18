@@ -57,7 +57,7 @@ class Actor(nn.Module):
 
 
         #Out
-        out = F.tanh(self.w_out(out))
+        out = F.tanh(self.w_out(out)) #[-1,1] ouput the action
         return out
 
 
@@ -97,7 +97,7 @@ class Critic(nn.Module):
         out = F.elu(out)
 
         # Output interface
-        out = self.w_out(out)
+        out = self.w_out(out) #output the predicted Q value for the state and the action(actor)
 
         return out
 

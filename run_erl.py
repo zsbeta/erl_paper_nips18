@@ -21,10 +21,10 @@ class Parameters:
         elif env_tag == 'Ant-v2': self.num_frames = 6000000
         elif env_tag == 'Walker2d-v2': self.num_frames = 8000000
         else: self.num_frames = 2000000
-
+        print("-------current_env", env_tag)
         #USE CUDA
         self.is_cuda = True; self.is_memory_cuda = True
-
+        print("--------cuda available:", self.is_cuda)
         #Sunchronization Period
         if env_tag == 'Hopper-v2' or env_tag == 'Ant-v2': self.synch_period = 1
         else: self.synch_period = 10
@@ -102,9 +102,9 @@ class Agent:
             if store_transition: self.num_frames += 1; self.gen_frames += 1
             if render and is_render: self.env.render()
             action = net.forward(state)
-            action.clamp(-1,1)
+            action.clamp(-1,1) # clip the value in [-1,1], but tanh should already output [-1, 1], what is the point?
             action = utils.to_numpy(action.cpu())
-            if is_action_noise: action += self.ounoise.noise()
+            if is_action_noise: action += self.ounoise.noise() # add more randomless, exploration
 
             next_state, reward, done, info = self.env.step(action.flatten())  #Simulate one step in environment
             next_state = utils.to_tensor(next_state).unsqueeze(0)
@@ -116,7 +116,7 @@ class Agent:
             state = next_state
         if store_transition: self.num_games += 1
 
-        return total_reward
+        return total_reward #return the total rewarard
 
     def rl_to_evo(self, rl_net, evo_net):
         for target_param, param in zip(evo_net.parameters(), rl_net.parameters()):
@@ -124,7 +124,7 @@ class Agent:
 
     def train(self):
         self.gen_frames = 0
-
+        ##****Fitness funtion is the total reward*****
         ####################### EVOLUTION #####################
         all_fitness = []
         #Evaluate genomes/individuals
@@ -154,11 +154,11 @@ class Agent:
             for _ in range(int(self.gen_frames*self.args.frac_frames_train)):
                 transitions = self.replay_buffer.sample(self.args.batch_size)
                 batch = replay_memory.Transition(*zip(*transitions))
-                self.rl_agent.update_parameters(batch)
+                self.rl_agent.update_parameters(batch)#train the rl agent with the batch
 
             #Synch RL Agent to NE
             if self.num_games % self.args.synch_period == 0:
-                self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])
+                self.rl_to_evo(self.rl_agent.actor, self.pop[worst_index])#substitute the worst individual by the rl agent
                 self.evolver.rl_policy = worst_index
                 print('Synch from RL --> Nevo')
 
@@ -200,14 +200,3 @@ if __name__ == "__main__":
             next_save += 100
             if elite_index != None: torch.save(agent.pop[elite_index].state_dict(), parameters.save_foldername + 'evo_net')
             print("Progress Saved")
-
-
-
-
-
-
-
-
-
-
-

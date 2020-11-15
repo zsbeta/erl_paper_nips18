@@ -4,7 +4,7 @@ from scipy.special import expit
 import fastrand, math
 
 
-#Neuroevolution SSNE
+#Neuroevolution SSNE (state space Neuroevolution?)
 class SSNE:
     def __init__(self, args):
         self.current_gen = 0
@@ -183,5 +183,3 @@ class SSNE:
 def unsqueeze(array, axis=1):
     if axis == 0: return np.reshape(array, (1, len(array)))
     elif axis == 1: return np.reshape(array, (len(array), 1))
-
-
